@@ -11,5 +11,7 @@ module.exports = {
     ecmaVersion: 12,
   },
   rules: {
+    // 'no-multi-assign': 0,
+    'no-console': 0,
   },
 };
