@@ -1,2 +1,8 @@
 node_modules
 .env
+credentials.json
+token.json
+conf.conf
+gw2ei/
+csv/
+uploads/
