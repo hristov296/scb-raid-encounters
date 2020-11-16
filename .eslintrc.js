@@ -13,5 +13,7 @@ module.exports = {
   rules: {
     // 'no-multi-assign': 0,
     'no-console': 0,
+    'no-unused-vars': 0,
+    'consistent-return': 0,
   },
 };

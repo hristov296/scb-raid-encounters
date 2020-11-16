@@ -2,10 +2,12 @@
   "name": "scb-raid-encounters",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "preinstall": "tar xf gw2ei.tar.xz",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "parse": "mono gw2ei/GuildWars2EliteInsights.exe -p -c gw2ei/conf.conf $file"
+    "parse": "mono gw2ei/GuildWars2EliteInsights.exe -p -c gw2ei/conf.conf $file",
+    "clean-res": "rm -f uploads/* csv/*"
   },
   "author": "Hristo Hristov",
   "license": "ISC",

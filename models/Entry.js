@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
+  uuid: String,
   name: String,
+  gDriveId: String,
   filepath: String,
   csvFilePath: String,
   dpsLink: String,
