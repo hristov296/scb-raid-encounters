@@ -44,6 +44,7 @@ app.get('/', (req, res) => {
 
 app.post('/upload', upload);
 app.post('/test', test);
+app.get('/test', test);
 app.get('/readCell', readCell);
 app.get('/readBatch', readBatch);
 app.post('/updateCell', updateCell);

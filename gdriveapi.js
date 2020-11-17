@@ -192,11 +192,48 @@ function updateCell(spreadsheetId, range, resource) {
   });
 }
 
+function appendValues(spreadsheetId, range, resource) {
+  return new Promise((res, rej) => {
+    fs.readFile('./config/credentials.json', (err, content) => {
+      if (err) return console.log('Error loading client secret file:', err);
+      // Authorize a client with credentials, then call the Google Drive API.
+      authorize(JSON.parse(content), (auth) => {
+        const sheets = google.sheets({ version: 'v4', auth });
+        console.log(`spreadsheetId + ${spreadsheetId}`);
+        console.log(`range + ${range}`);
+        console.log(`resource + ${resource}`);
+        sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range,
+          valueInputOption: 'RAW',
+          insertDataOption: 'INSERT_ROWS',
+          resource,
+        }, (getSheetsErr, getSheetsResult) => {
+          if (getSheetsErr) {
+            let error;
+            if (Object.prototype.hasOwnProperty.call(getSheetsErr, 'response')) {
+              const { message, code } = getSheetsErr.response.data.error;
+              error = new Error(message);
+              error.code = code;
+            } else {
+              error = getSheetsErr;
+              error.code = 500;
+            }
+            return rej(error);
+          }
+          res(getSheetsResult);
+        });
+      });
+    });
+  });
+}
+
 module.exports = {
   importCsv,
   readCell,
   readBatch,
   updateCell,
+  appendValues,
 };
 
 // module.exports = new GdriveApi();

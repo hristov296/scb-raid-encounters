@@ -66,8 +66,8 @@ module.exports = async (req, res, next) => {
 
     const batchReadData = await gDriveApi.readBatch(gSheetId, ['B7', 'B6', 'B11', 'B16', 'B1', 'B3']);
 
-    const currentCellNumbers = await Cell.find({}, 'cellNumber').exec();
-    console.log(`currentCellNumbers+${currentCellNumbers}`);
+    // const currentCellNumbers = await Cell.find({}, 'cellNumber').exec();
+    // console.log(`currentCellNumbers+${currentCellNumbers}`);
 
     const newEntry = new Entry({
       _id: new mongoose.Types.ObjectId(),
@@ -85,14 +85,14 @@ module.exports = async (req, res, next) => {
     const newCell = new Cell({
       _id: new mongoose.Types.ObjectId(),
       entryId: newEntry._id,
-      cellAddress: `data!B${3}`,
     });
 
     newEntry.cellId = newCell._id;
-    console.log('are we promising');
+
     await Promise.all([newEntry.save(), newCell.save()]);
 
     await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
+    await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
   } catch (e) {
     console.log(e);
     return next({ status: 500, message: e.message });
