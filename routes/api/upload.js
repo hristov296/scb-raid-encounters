@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const gDriveApi = require('../../gdriveapi');
 
 const Entry = require('../../models/Entry');
+const Cell = require('../../models/Cell');
+const gdriveapi = require('../../gdriveapi');
 
 module.exports = async (req, res, next) => {
   if (!req.files) {
@@ -30,15 +32,19 @@ module.exports = async (req, res, next) => {
 
   evtc.mv(`./uploads/${newName}`);
 
-  // console.log(evtc);
-
   const { stdout, stderr } = await exec(
     `mono gw2ei/GuildWars2EliteInsights.exe -p -c config/conf.conf "uploads/${newName}"`,
   );
 
   console.log('gw2ei output:\n', stdout);
   console.log('-----------');
-  // console.log('stderr:', stderr);
+
+  if (stderr.length > 0) {
+    return next({
+      status: 500,
+      message: stderr,
+    });
+  }
 
   const matchedFile = stdout.match(/Generated: (.*)/);
   if (!matchedFile) {
@@ -51,30 +57,47 @@ module.exports = async (req, res, next) => {
 
   const csvFile = path.basename(matchedFile[0]);
 
-  if (stderr.length > 0) {
-    return next({
-      status: 500,
-      message: stderr,
+  try {
+    const gSheetId = await gDriveApi.importCsv({
+      name: csvFile,
+      path: `./csv/${csvFile}`,
     });
+    console.log(`created new table id: ${gSheetId}`);
+
+    const batchReadData = await gDriveApi.readBatch(gSheetId, ['B7', 'B6', 'B11', 'B16', 'B1', 'B3']);
+
+    const currentCellNumbers = await Cell.find({}, 'cellNumber').exec();
+    console.log(`currentCellNumbers+${currentCellNumbers}`);
+
+    const newEntry = new Entry({
+      _id: new mongoose.Types.ObjectId(),
+      uuid,
+      name: csvFile,
+      gSheetId,
+      dpsLink: batchReadData.valueRanges[0].values[0][0],
+      logDate: batchReadData.valueRanges[1].values[0][0],
+      boss: batchReadData.valueRanges[2].values[0][0],
+      duration: batchReadData.valueRanges[3].values[0][0],
+      eiVer: batchReadData.valueRanges[4].values[0][0],
+      fightId: batchReadData.valueRanges[5].values[0][0],
+    });
+
+    const newCell = new Cell({
+      _id: new mongoose.Types.ObjectId(),
+      entryId: newEntry._id,
+      cellAddress: `data!B${3}`,
+    });
+
+    newEntry.cellId = newCell._id;
+    console.log('are we promising');
+    await Promise.all([newEntry.save(), newCell.save()]);
+
+    await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
+  } catch (e) {
+    console.log(e);
+    return next({ status: 500, message: e.message });
   }
 
-  // gDriveApi.init()
-  //   .then(() => {
-  //     gDriveApi.importCsv({
-  //       name: csvFile,
-  //       path: `./csv/${csvFile}`,
-  //     });
-  //   }).catch((e) => console.log(e));
-
-  const gSheetId = await gDriveApi.importCsv({
-    name: csvFile,
-    path: `./csv/${csvFile}`,
-  });
-
-  console.log(`created new table id: ${gSheetId}`);
-
   // return response
-  res.status(200).send({
-    sheetId: gSheetId,
-  });
+  res.status(200).send('asd');
 };

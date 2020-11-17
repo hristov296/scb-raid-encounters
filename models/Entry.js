@@ -1,15 +1,24 @@
 const mongoose = require('mongoose');
 
-const schema = new mongoose.Schema({
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
+
+const schema = Schema({
   uuid: String,
   name: String,
-  gDriveId: String,
-  filepath: String,
-  csvFilePath: String,
+  gSheetId: String,
   dpsLink: String,
   logDate: Date,
   boss: String,
-  time: String,
+  duration: String,
+  eiVer: String,
+  fightId: Number,
+  cellAddress: String,
+  cellId: {
+    type: ObjectId,
+    required: true,
+    ref: 'Cell',
+  },
   isVisible: Boolean,
 }, { timestamps: true });
 

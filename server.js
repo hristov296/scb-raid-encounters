@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const upload = require('./routes/api/upload');
 const test = require('./routes/api/test');
+const { readCell, readBatch, updateCell } = require('./routes/api/gSheets');
 
 mongoose
   .connect(
@@ -42,9 +43,12 @@ app.get('/', (req, res) => {
 });
 
 app.post('/upload', upload);
-app.get('/test', test);
+app.post('/test', test);
+app.get('/readCell', readCell);
+app.get('/readBatch', readBatch);
+app.post('/updateCell', updateCell);
 
-app.use((error, req, res, next) => res.status(500).send(error.message));
+app.use((error, req, res, next) => res.status(error.status).send(error.message));
 
 app.listen(port, () => {
   console.log(`Server is listening on ${port}`);
