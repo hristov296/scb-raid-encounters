@@ -2,7 +2,7 @@ const gDriveApi = require('../../gdriveapi');
 const Cell = require('../../models/Cell');
 
 module.exports = async (req, res, next) => {
-  const { sheetId, range } = req.query;
+  const { sheetId, range, valueInputOption } = req.query;
   const { resource } = req.body;
 
   console.log(req.body);
@@ -10,8 +10,11 @@ module.exports = async (req, res, next) => {
     // const getCell = await gDriveApi.updateCell(sheetId, range, resource);
     // console.log(getCell);
 
-    const getCell = await gDriveApi.appendValues(sheetId, range, resource);
+    const getCell = await gDriveApi.appendValues(sheetId, range, undefined, resource);
     console.log(getCell);
+
+    // const getCell = await gDriveApi.batchUpdate(sheetId, resource);
+    // console.log(getCell);
 
     // const currentCellNumbers = await Cell.find({}, 'cellNumber -_id').exec();
     // console.log(`currentCellNumbers+${currentCellNumbers}`);

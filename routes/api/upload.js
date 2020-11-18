@@ -91,8 +91,9 @@ module.exports = async (req, res, next) => {
 
     await Promise.all([newEntry.save(), newCell.save()]);
 
-    await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
-    await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
+    // await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
+    const { data: updatedData } = await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', 'RAW', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
+    await gDriveApi.batchUpdate(process.env.SHEET_ID, updatedData.updates.updatedRange.replace('data!B', ''));
   } catch (e) {
     console.log(e);
     return next({ status: 500, message: e.message });

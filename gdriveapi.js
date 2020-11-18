@@ -157,7 +157,7 @@ function readBatch(spreadsheetId, ranges = []) {
   });
 }
 
-function updateCell(spreadsheetId, range, resource) {
+function updateCell(spreadsheetId, range, valueInputOption = 'RAW', resource) {
   return new Promise((res, rej) => {
     fs.readFile('./config/credentials.json', (err, content) => {
       if (err) return console.log('Error loading client secret file:', err);
@@ -170,7 +170,7 @@ function updateCell(spreadsheetId, range, resource) {
         sheets.spreadsheets.values.update({
           spreadsheetId,
           range,
-          valueInputOption: 'RAW',
+          valueInputOption,
           resource,
         }, (getSheetsErr, getSheetsResult) => {
           if (getSheetsErr) {
@@ -192,7 +192,37 @@ function updateCell(spreadsheetId, range, resource) {
   });
 }
 
-function appendValues(spreadsheetId, range, resource) {
+function batchUpdate(spreadsheetId, resource) {
+  return new Promise((res, rej) => {
+    fs.readFile('./config/credentials.json', (err, content) => {
+      if (err) return console.log('Error loading client secret file:', err);
+      // Authorize a client with credentials, then call the Google Drive API.
+      authorize(JSON.parse(content), (auth) => {
+        const sheets = google.sheets({ version: 'v4', auth });
+        sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource,
+        }, (getSheetsErr, getSheetsResult) => {
+          if (getSheetsErr) {
+            let error;
+            if (Object.prototype.hasOwnProperty.call(getSheetsErr, 'response')) {
+              const { message, code } = getSheetsErr.response.data.error;
+              error = new Error(message);
+              error.code = code;
+            } else {
+              error = getSheetsErr;
+              error.code = 500;
+            }
+            return rej(error);
+          }
+          res(getSheetsResult);
+        });
+      });
+    });
+  });
+}
+
+function appendValues(spreadsheetId, range, valueInputOption = 'RAW', resource) {
   return new Promise((res, rej) => {
     fs.readFile('./config/credentials.json', (err, content) => {
       if (err) return console.log('Error loading client secret file:', err);
@@ -205,7 +235,7 @@ function appendValues(spreadsheetId, range, resource) {
         sheets.spreadsheets.values.append({
           spreadsheetId,
           range,
-          valueInputOption: 'RAW',
+          valueInputOption,
           insertDataOption: 'INSERT_ROWS',
           resource,
         }, (getSheetsErr, getSheetsResult) => {
@@ -233,6 +263,7 @@ module.exports = {
   readCell,
   readBatch,
   updateCell,
+  batchUpdate,
   appendValues,
 };
 
