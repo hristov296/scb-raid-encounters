@@ -1,7 +1,18 @@
 module.exports = {
-  batchUpdateCalculate(index) {
+  batchUpdateCalculate(index, sheetToPaste) {
     return {
       requests: [
+        {
+          appendCells: {
+            sheetId: 0,
+            rows: [
+              {
+                values: [[sheetToPaste]],
+              },
+            ],
+            fields: '*',
+          },
+        },
         {
           copyPaste: {
             source: {
@@ -82,6 +93,13 @@ module.exports = {
             pasteOrientation: 'NORMAL',
           },
         },
+      ],
+    };
+  },
+  batchUpdatePredefined(sheetId) {
+    return {
+      values: [
+        [sheetId, 12],
       ],
     };
   },

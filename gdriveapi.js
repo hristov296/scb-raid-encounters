@@ -72,7 +72,7 @@ function importCsv(file) {
         const fileMetadata = {
           name: file.name,
           mimeType: 'application/vnd.google-apps.spreadsheet',
-          parents: ['16MG2uBkpa4TDq18IXe2rF_00NuKySSUY'],
+          parents: ['14eJqzW9W41dAQ60gJuH3h_6PG1AWYYLP'],
         };
         const media = {
           mimeType: 'text/csv',
@@ -222,7 +222,7 @@ function batchUpdate(spreadsheetId, resource) {
   });
 }
 
-function appendValues(spreadsheetId, range, valueInputOption = 'RAW', resource) {
+function appendValues(spreadsheetId, range, valueInputOption = 'RAW', insertDataOption = 'INSERT_ROWS', resource) {
   return new Promise((res, rej) => {
     fs.readFile('./config/credentials.json', (err, content) => {
       if (err) return console.log('Error loading client secret file:', err);
@@ -233,7 +233,7 @@ function appendValues(spreadsheetId, range, valueInputOption = 'RAW', resource) 
           spreadsheetId,
           range,
           valueInputOption,
-          insertDataOption: 'INSERT_ROWS',
+          insertDataOption,
           resource,
         }, (getSheetsErr, getSheetsResult) => {
           if (getSheetsErr) {

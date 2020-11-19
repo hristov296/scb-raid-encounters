@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
     // const getCell = await gDriveApi.updateCell(sheetId, range, resource);
     // console.log(getCell);
 
-    const getCell = await gDriveApi.appendValues(sheetId, range, undefined, resource);
+    const getCell = await gDriveApi.appendValues(sheetId, range, 'USER_ENTERED', resource);
     console.log(getCell);
 
     // const getCell = await gDriveApi.batchUpdate(sheetId, resource);

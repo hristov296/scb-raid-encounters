@@ -10,7 +10,7 @@ const Entry = require('../../models/Entry');
 const Cell = require('../../models/Cell');
 
 module.exports = async (req, res, next) => {
-  let response = '';
+  const response = '';
   if (!req.files) {
     return next({
       status: 400,
@@ -93,8 +93,9 @@ module.exports = async (req, res, next) => {
     await Promise.all([newEntry.save(), newCell.save()]);
 
     // await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
-    const { data: updatedData } = await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', 'RAW', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
-    response = await gDriveApi.batchUpdate(process.env.SHEET_ID, utils.batchUpdateCalculate(parseInt(updatedData.updates.updatedRange.replace('data!B', ''), 10)));
+    // const { data: updatedData } = await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', 'USER_ENTERED', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`, '=B2']] });
+    // response = await gDriveApi.batchUpdate(process.env.SHEET_ID, utils.batchUpdateCalculate(parseInt(updatedData.updates.updatedRange.replace('data!B', ''), 10)), `https://docs.google.com/spreadsheets/d/${gSheetId}/`);
+    await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', 'RAW', 'INSERT_ROWS', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`], [`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
   } catch (e) {
     console.log(e);
     return next({ status: 500, message: e.message });
