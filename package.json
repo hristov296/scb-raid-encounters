@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "preinstall": "tar xf gw2ei.tar.xz",
+    "preinstall": "tar xf gw2ei.tar.xz | unzip -u gw2ei -d gw2ei",
     "test": "echo \"Error: no test specified\" && exit 1",
     "parse": "mono gw2ei/GuildWars2EliteInsights.exe -p -c gw2ei/conf.conf $file",
     "clean-res": "rm -f uploads/* csv/*"
@@ -12,11 +12,13 @@
   "author": "Hristo Hristov",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
+    "form-data": "^3.0.0",
     "googleapis": "^64.0.0",
     "lodash": "^4.17.20",
     "mongoose": "^5.10.13",

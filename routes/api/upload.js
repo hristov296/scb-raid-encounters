@@ -4,12 +4,13 @@ const path = require('path');
 const shortid = require('shortid');
 const mongoose = require('mongoose');
 const gDriveApi = require('../../gdriveapi');
+const utils = require('../../utils');
 
 const Entry = require('../../models/Entry');
 const Cell = require('../../models/Cell');
-const gdriveapi = require('../../gdriveapi');
 
 module.exports = async (req, res, next) => {
+  let response = '';
   if (!req.files) {
     return next({
       status: 400,
@@ -17,47 +18,47 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  const evtc = req.files.file;
-  const uuid = shortid.generate();
-  const evtcName = evtc.name.split('.');
-
-  if (evtcName.length !== 2) {
-    return next({
-      status: 400,
-      message: 'Incorrect filename or extension.',
-    });
-  }
-
-  const newName = `${evtcName[0]}-${uuid}.${evtcName[1]}`;
-
-  evtc.mv(`./uploads/${newName}`);
-
-  const { stdout, stderr } = await exec(
-    `mono gw2ei/GuildWars2EliteInsights.exe -p -c config/conf.conf "uploads/${newName}"`,
-  );
-
-  console.log('gw2ei output:\n', stdout);
-  console.log('-----------');
-
-  if (stderr.length > 0) {
-    return next({
-      status: 500,
-      message: stderr,
-    });
-  }
-
-  const matchedFile = stdout.match(/Generated: (.*)/);
-  if (!matchedFile) {
-    console.log('no matched file');
-    return next({
-      status: 500,
-      message: 'Failed parsing file, using gw2ei',
-    });
-  }
-
-  const csvFile = path.basename(matchedFile[0]);
-
   try {
+    const evtc = req.files.file;
+    const uuid = shortid.generate();
+    const evtcName = evtc.name.split('.');
+
+    if (evtcName.length !== 2) {
+      return next({
+        status: 400,
+        message: 'Incorrect filename or extension.',
+      });
+    }
+
+    const newName = `${evtcName[0]}-${uuid}.${evtcName[1]}`;
+
+    evtc.mv(`./uploads/${newName}`);
+
+    const { stdout, stderr } = await exec(
+      `mono gw2ei/GuildWars2EliteInsights.exe -p -c config/conf.conf "uploads/${newName}"`,
+    );
+
+    console.log('gw2ei output:\n', stdout);
+    console.log('-----------');
+
+    if (stderr.length > 0) {
+      return next({
+        status: 500,
+        message: stderr,
+      });
+    }
+
+    const matchedFile = stdout.match(/Generated: (.*)/);
+    if (!matchedFile) {
+      console.log('no matched file');
+      return next({
+        status: 500,
+        message: 'Failed parsing file, using gw2ei',
+      });
+    }
+
+    const csvFile = path.basename(matchedFile[0]);
+
     const gSheetId = await gDriveApi.importCsv({
       name: csvFile,
       path: `./csv/${csvFile}`,
@@ -93,12 +94,12 @@ module.exports = async (req, res, next) => {
 
     // await gDriveApi.updateCell('1nefgFI-GSJUiIdVeKtH07CfJ2qM3KJXuMPiHvHKpdtg', newCell.cellAddress, { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
     const { data: updatedData } = await gDriveApi.appendValues(process.env.SHEET_ID, 'data!B2', 'RAW', { values: [[`https://docs.google.com/spreadsheets/d/${gSheetId}/`]] });
-    await gDriveApi.batchUpdate(process.env.SHEET_ID, updatedData.updates.updatedRange.replace('data!B', ''));
+    response = await gDriveApi.batchUpdate(process.env.SHEET_ID, utils.batchUpdateCalculate(parseInt(updatedData.updates.updatedRange.replace('data!B', ''), 10)));
   } catch (e) {
     console.log(e);
     return next({ status: 500, message: e.message });
   }
 
   // return response
-  res.status(200).send('asd');
+  res.status(200).send(response);
 };

@@ -229,9 +229,6 @@ function appendValues(spreadsheetId, range, valueInputOption = 'RAW', resource) 
       // Authorize a client with credentials, then call the Google Drive API.
       authorize(JSON.parse(content), (auth) => {
         const sheets = google.sheets({ version: 'v4', auth });
-        console.log(`spreadsheetId + ${spreadsheetId}`);
-        console.log(`range + ${range}`);
-        console.log(`resource + ${resource}`);
         sheets.spreadsheets.values.append({
           spreadsheetId,
           range,

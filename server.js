@@ -48,6 +48,12 @@ app.get('/test', test);
 app.get('/readCell', readCell);
 app.get('/readBatch', readBatch);
 app.post('/updateCell', updateCell);
+app.post('/uploaddd', (req, res) => {
+  console.log(req.files);
+  setTimeout(() => {
+    res.send(200);
+  }, 1000);
+});
 
 app.use((error, req, res, next) => res.status(error.status).send(error.message));
 

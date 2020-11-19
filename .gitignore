@@ -4,3 +4,4 @@ config/**
 gw2ei/
 csv/**
 uploads/**
+logs-for-upload/**
